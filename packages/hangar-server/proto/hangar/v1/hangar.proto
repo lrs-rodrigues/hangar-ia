@@ -1,0 +1,198 @@
+syntax = "proto3";
+
+package hangar.v1;
+
+// The native gRPC contract mirrors the stable HTTP read/write primitives.
+// Authorization is sent as the standard `authorization: Bearer <key>` metadata.
+service HangarService {
+  rpc GetHealth(HealthRequest) returns (HealthResponse);
+  rpc CreateMemory(CreateMemoryRequest) returns (Memory);
+  rpc GetMemory(GetMemoryRequest) returns (Memory);
+  rpc RetrieveMemories(RetrieveRequest) returns (MemoryRetrievalResponse);
+  rpc RetrieveDocuments(RetrieveRequest) returns (DocumentRetrievalResponse);
+  rpc CompileContextPackage(ContextPackageRequest) returns (ContextPackage);
+  rpc CreateWorkingSession(CreateWorkingSessionRequest) returns (WorkingSession);
+  rpc GetWorkingSession(GetWorkingSessionRequest) returns (WorkingSession);
+  rpc AppendWorkingMemory(AppendWorkingMemoryRequest) returns (WorkingMemoryEntry);
+  rpc UpdateWorkingSummary(UpdateWorkingSummaryRequest) returns (WorkingSession);
+  rpc PromoteWorkingMemory(PromoteWorkingMemoryRequest) returns (Memory);
+}
+
+message HealthRequest {}
+message HealthResponse {
+  string status = 1;
+  string storage = 2;
+}
+
+message Scope {
+  string organization_id = 1;
+  string workspace_id = 2;
+}
+
+message CreateMemoryRequest {
+  Scope scope = 1;
+  string content = 2;
+  optional string source = 3;
+  optional float confidence = 4;
+  optional uint64 expires_at_unix_ms = 5;
+}
+
+message GetMemoryRequest {
+  Scope scope = 1;
+  string memory_id = 2;
+}
+
+message RetrieveRequest {
+  Scope scope = 1;
+  string query = 2;
+  uint32 limit = 3;
+}
+
+message Memory {
+  string id = 1;
+  string organization_id = 2;
+  string workspace_id = 3;
+  string content = 4;
+  optional string source = 5;
+  float confidence = 6;
+  string lifecycle = 7;
+  uint64 version = 8;
+  uint64 created_at_unix_ms = 9;
+  uint64 updated_at_unix_ms = 10;
+  optional uint64 expires_at_unix_ms = 11;
+  optional string superseded_by = 12;
+  string created_by = 13;
+  string content_sha256 = 14;
+  string retention = 15;
+  MemoryProvenance provenance = 16;
+}
+
+message MemoryProvenance {
+  string kind = 1;
+  optional string session_id = 2;
+  optional string entry_id = 3;
+  optional string entry_sha256 = 4;
+  optional string session_created_by = 5;
+}
+
+message MemoryRetrievalResponse {
+  string query = 1;
+  repeated Memory results = 2;
+}
+
+message RetrievedChunk {
+  string document_id = 1;
+  string document_name = 2;
+  string source = 3;
+  uint32 ordinal = 4;
+  string content = 5;
+  float score = 6;
+  optional float vector_score = 7;
+  optional float graph_score = 8;
+  optional uint32 graph_hops = 9;
+  float final_score = 10;
+  string embedding_provider = 11;
+  string embedding_model_revision = 12;
+}
+
+message DocumentRetrievalResponse {
+  string query = 1;
+  repeated RetrievedChunk results = 2;
+  bool retrieved_content_is_untrusted = 3;
+}
+
+message ContextPackageRequest {
+  Scope scope = 1;
+  string query = 2;
+  uint32 token_budget = 3;
+  uint32 limit = 4;
+}
+
+message ContextEvidence {
+  string memory_id = 1;
+  string source_workspace_id = 2;
+  optional string source = 3;
+  string content_sha256 = 4;
+  uint64 memory_version = 5;
+  optional string share_id = 6;
+}
+
+message ContextItem {
+  string content = 1;
+  uint64 score = 2;
+  uint32 estimated_tokens = 3;
+  bool untrusted = 4;
+  ContextEvidence evidence = 5;
+}
+
+message ContextPackage {
+  string organization_id = 1;
+  string workspace_id = 2;
+  string query = 3;
+  uint32 token_budget = 4;
+  uint32 estimated_tokens = 5;
+  repeated ContextItem items = 6;
+  string policy_notice = 7;
+}
+
+message CreateWorkingSessionRequest {
+  Scope scope = 1;
+  optional uint64 ttl_ms = 2;
+}
+
+message GetWorkingSessionRequest {
+  Scope scope = 1;
+  string session_id = 2;
+}
+
+message AppendWorkingMemoryRequest {
+  Scope scope = 1;
+  string session_id = 2;
+  // One of note, tool_output, or observation.
+  string kind = 3;
+  string content = 4;
+}
+
+message UpdateWorkingSummaryRequest {
+  Scope scope = 1;
+  string session_id = 2;
+  string content = 3;
+}
+
+message PromoteWorkingMemoryRequest {
+  Scope scope = 1;
+  string session_id = 2;
+  string entry_id = 3;
+  optional string source = 4;
+  optional float confidence = 5;
+  optional uint64 expires_at_unix_ms = 6;
+}
+
+message WorkingSessionSummary {
+  string content = 1;
+  string content_sha256 = 2;
+  string updated_by = 3;
+  uint64 updated_at_unix_ms = 4;
+  uint64 version = 5;
+}
+
+message WorkingMemoryEntry {
+  string id = 1;
+  string kind = 2;
+  string content = 3;
+  string content_sha256 = 4;
+  string created_by = 5;
+  uint64 created_at_unix_ms = 6;
+}
+
+message WorkingSession {
+  string id = 1;
+  string organization_id = 2;
+  string workspace_id = 3;
+  string created_by = 4;
+  uint64 created_at_unix_ms = 5;
+  uint64 updated_at_unix_ms = 6;
+  uint64 expires_at_unix_ms = 7;
+  optional WorkingSessionSummary summary = 8;
+  repeated WorkingMemoryEntry entries = 9;
+}

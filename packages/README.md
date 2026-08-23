@@ -7,7 +7,8 @@ contracts remain at the root.
 | Package | Responsibility |
 | --- | --- |
 | `hangar-server` | Embedded Rust API, storage engine, ingestion, retrieval, and protocol adapters. |
-| `hangar-admin` | Reserved for the future Next.js/shadcn administrative console. |
+| `hangar-cli` | Thin native HTTP command-line client. |
+| `hangar-mcp` | Local stdio MCP adapter over the native HTTP API. |
 
 Shared code is introduced only after at least two packages need it. Put such
 code in a clearly named workspace package instead of creating implicit imports

@@ -1,6 +1,6 @@
 # ADR 0001: Protocol-neutral core with edge adapters
 
-**Status:** Proposed
+**Status:** Accepted
 
 ## Decision
 
@@ -16,3 +16,9 @@ MCP is designed for host/client/server context and tool integration, while A2A i
 - The core owns authentication, authorization, policy, audit, rate limits, and schemas.
 - Every adapter declares supported capabilities and preserves provenance.
 - ACP support remains deferred until the selected ACP specification and target clients are named.
+
+## Implementation status
+
+The initial native HTTP API, same-process gRPC service, CLI, and thin stdio MCP
+adapter implement this decision. A2A, UTCP, and ACP remain deferred rather than
+being represented by speculative compatibility endpoints.

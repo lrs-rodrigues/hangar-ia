@@ -1,5 +1,9 @@
 [workspace]
-members = ["packages/hangar-server"]
+members = [
+    "packages/hangar-cli",
+    "packages/hangar-mcp",
+    "packages/hangar-server",
+]
 resolver = "2"
 
 [workspace.package]
