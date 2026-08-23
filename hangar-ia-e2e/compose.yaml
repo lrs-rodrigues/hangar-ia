@@ -1,0 +1,26 @@
+name: hangar-ia-e2e
+
+services:
+  hangar:
+    image: ${HANGAR_IMAGE:-hangar-server-operational-test}
+    environment:
+      HANGAR_BOOTSTRAP_TOKEN: e2e-bootstrap-only
+      HANGAR_MAX_DOCUMENT_BYTES: "65536"
+      HANGAR_MAX_DOCUMENTS_PER_WORKSPACE: "8"
+    volumes:
+      - hangar-e2e-data:/var/lib/hangar
+
+  e2e:
+    image: python:3.13-alpine
+    depends_on:
+      - hangar
+    volumes:
+      - ./scenario.py:/scenario.py:ro
+      - ./corpus:/corpus:ro
+    environment:
+      HANGAR_URL: http://hangar:8080
+      HANGAR_BOOTSTRAP_TOKEN: e2e-bootstrap-only
+    command: ["python", "/scenario.py"]
+
+volumes:
+  hangar-e2e-data:

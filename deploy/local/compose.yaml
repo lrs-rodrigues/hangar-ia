@@ -1,0 +1,65 @@
+name: hangar-local
+
+services:
+  hangar-server:
+    image: ${HANGAR_IMAGE:-hangar-ai:local}
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    init: true
+    restart: unless-stopped
+    environment:
+      HANGAR_BOOTSTRAP_TOKEN: ${HANGAR_BOOTSTRAP_TOKEN:?set HANGAR_BOOTSTRAP_TOKEN in .env}
+      HANGAR_DATA_DIR: /var/lib/hangar
+      HANGAR_LISTEN_ADDR: 0.0.0.0:8080
+      HANGAR_GRPC_LISTEN_ADDR: 0.0.0.0:50051
+      HANGAR_EMBEDDING_PROFILE: ${HANGAR_EMBEDDING_PROFILE:-hashing-v1}
+      HANGAR_LOCAL_MODEL_DIR: /var/lib/hangar/models/local-multilingual-v1
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:50051:50051"
+    volumes:
+      - hangar-data:/var/lib/hangar
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/hangar", "--server-url", "http://127.0.0.1:8080", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # This is a stdio process, not a network service. Codex launches it with
+  # `docker compose run --rm -T hangar-mcp`; do not start it through `up`.
+  hangar-mcp:
+    image: ${HANGAR_IMAGE:-hangar-ai:local}
+    profiles: ["mcp"]
+    depends_on:
+      hangar-server:
+        condition: service_healthy
+    environment:
+      HANGAR_SERVER_URL: http://hangar-server:8080
+      HANGAR_API_KEY: ${HANGAR_API_KEY:?set HANGAR_API_KEY in .env after bootstrap}
+    entrypoint: ["/usr/local/bin/hangar-mcp"]
+    stdin_open: true
+    tty: false
+    restart: "no"
+
+  # Offline maintenance only. The active server MUST be stopped before this
+  # container is run, otherwise backup intentionally fails rather than copying
+  # a potentially inconsistent embedded data directory.
+  backup:
+    image: ${HANGAR_IMAGE:-hangar-ai:local}
+    profiles: ["operations"]
+    entrypoint: ["/usr/local/bin/hangar-server"]
+    volumes:
+      # redb opens its advisory lock while validating a snapshot, so this mount
+      # cannot be read-only. The documented stopped-server precondition is the
+      # concurrency boundary for this one-off maintenance container.
+      - hangar-data:/var/lib/hangar
+      - hangar-backups:/backups
+    restart: "no"
+
+volumes:
+  hangar-data:
+    name: hangar-local-data
+  hangar-backups:
+    name: hangar-local-backups

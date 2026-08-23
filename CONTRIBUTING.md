@@ -1,6 +1,8 @@
 # Contributing to Hangar AI
 
-Thank you for contributing. This project is in its architecture-acceptance phase; focused issues and ADR feedback are especially valuable.
+Thank you for contributing. Hangar is an alpha project; focused bug reports,
+retrieval evaluations, operational feedback, and ADR discussion are especially
+valuable.
 
 1. Read `AGENTS.md` and the relevant `.agents/maps/` file.
 2. Search existing issues and ADRs.

@@ -42,3 +42,10 @@ jobs:
 
       - name: Build and test Linux container
         run: docker build --tag hangar-ai:ci .
+
+      - name: Run synthetic development-conversation E2E
+        run: HANGAR_IMAGE=hangar-ai:ci docker compose -f hangar-ia-e2e/compose.yaml up --abort-on-container-exit --exit-code-from e2e
+
+      - name: Clean up E2E resources
+        if: always()
+        run: docker compose -f hangar-ia-e2e/compose.yaml down -v --remove-orphans

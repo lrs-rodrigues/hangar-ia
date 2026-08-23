@@ -1,6 +1,6 @@
 # ADR 0002: Embedded-first storage with rebuildable projections
 
-**Status:** Proposed
+**Status:** Accepted
 
 ## Decision
 
