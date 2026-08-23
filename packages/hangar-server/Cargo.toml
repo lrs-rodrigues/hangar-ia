@@ -1,0 +1,27 @@
+[package]
+name = "hangar-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Embedded-first memory and knowledge server for AI agents."
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = "1.0.98"
+axum = "0.8.4"
+clap = { version = "4.5.41", features = ["derive", "env"] }
+hex = "0.4.3"
+redb = "2.6.1"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.142"
+sha2 = "0.10.9"
+tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread", "net", "signal"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+uuid = { version = "1.17.0", features = ["v7", "serde"] }
+
+[dev-dependencies]
+tempfile = "3.20.0"

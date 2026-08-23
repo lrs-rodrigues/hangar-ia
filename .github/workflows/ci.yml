@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  repository-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check whitespace errors
+        run: git diff --check $(git hash-object -t tree /dev/null) HEAD
+
+      - name: Validate local Markdown links
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          import sys
+
+          errors = []
+          pattern = re.compile(r'\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)')
+          for source in Path('.').rglob('*.md'):
+              if any(part in {'.git', 'node_modules'} for part in source.parts):
+                  continue
+              for target in pattern.findall(source.read_text(encoding='utf-8')):
+                  if target.startswith(('http://', 'https://', 'mailto:')):
+                      continue
+                  if not (source.parent / target).exists():
+                      errors.append(f'{source}: missing local link {target}')
+          if errors:
+              print('\n'.join(errors))
+              sys.exit(1)
+
+      - name: Build and test Linux container
+        run: docker build --tag hangar-ai:ci .

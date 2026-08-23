@@ -1,0 +1,9 @@
+# Review ownership for critical repository areas.
+# Replace @lrs-rodrigues with the maintainer team when it exists.
+
+* @lrs-rodrigues
+/AGENTS.md @lrs-rodrigues
+/.agents/ @lrs-rodrigues
+/docs/architecture/ @lrs-rodrigues
+/docs/security-model.md @lrs-rodrigues
+/.github/ @lrs-rodrigues

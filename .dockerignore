@@ -1,0 +1,8 @@
+.git
+.agents
+.github
+data
+target
+node_modules
+*.md
+!README.md

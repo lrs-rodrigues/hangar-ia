@@ -1,0 +1,22 @@
+name: Bug report
+description: Report reproducible incorrect behavior.
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Do not include credentials, tenant data, or sensitive context.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      placeholder: "1. ..."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
